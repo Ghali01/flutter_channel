@@ -1,16 +1,18 @@
 import socket
 from threading import Thread
 import random
-
+from channels import debugChannel
 class Host:
     __channels=dict()
     def __init__(self) -> None:
         self.__port=random.Random().randint(8000,15000)
+        
         print(self.__port)
         self.server=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+        # self.server.bind(('127.0.0.1',54112))
         self.server.bind(('127.0.0.1',self.__port))
         Thread(target= self.__startListen).start()
-
+        self.bindChannel(debugChannel)
     def __startListen(self):
         self.server.listen()
         while True:
@@ -24,10 +26,11 @@ class Host:
         
                     channelName=channelName.decode('utf-8')
                     if channelName in self.__channels:
-                        
+                        debugChannel.send(f'{channelName} {self.__channels[channelName]}')
                         Thread(target=self.__channels[channelName].setConnection,args=(conn,buffer)).start()
                     break
            
 
     def bindChannel(self,channel):
         self.__channels[channel.name]=channel
+  

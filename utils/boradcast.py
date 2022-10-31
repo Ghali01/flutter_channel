@@ -2,9 +2,9 @@ import threading
 import typing
 import random
 class GeneratorBroadcast:
-    generator=None
-    __callbacks=dict()
     def __init__(self,generator:typing.Iterable) -> None:
+        self.generator=None
+        self.__callbacks=dict()
         self.generator=generator
 
     def genID(self):

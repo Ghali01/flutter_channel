@@ -7,14 +7,16 @@ from typing import Callable
 from utils.boradcast import GeneratorBroadcast
 from message import Message
 import random
-class BytesChannel:
-    name:str
-    connection:socket=None
-    awaitMessages=[]
-    broadcast:GeneratorBroadcast=None
-    __handeler=None
+import json
+class Channel:
+    
+    
     def __init__(self,name:str):
         self.name=name        
+        self.awaitMessages=[]
+        self.__handeler=None
+        self.connection:socket=None
+        self.broadcast:GeneratorBroadcast=None    
         
     def setConnection(self,connection:socket,buffer):
         # print(self.name)
@@ -60,7 +62,7 @@ class BytesChannel:
     def genID(self):
         
         r=random.Random().randint(16777216,4294967295)
-        return self.int_to_bytes(r)
+        return self.__int_to_bytes(r)
 
     def __listenToMessages(self,msg:Message):
         if not msg.isReply:
@@ -70,7 +72,7 @@ class BytesChannel:
         
 
 
-    def int_to_bytes(self,value: int) -> bytes:
+    def __int_to_bytes(self,value: int) -> bytes:
         bin=[]
         while not value==0:
             bin.append(value % 2)
@@ -106,13 +108,10 @@ class BytesChannel:
     def setHandeler(self,handeler:Callable[[bytes,Reply],None]):
         self.__handeler=handeler
     
-    def encode(self,data:bytes)->bytes: 
-        return data
-    def decode(self,data)->bytes: 
-        return data
 
 
     def send(self,data:bytes,callback:Callable[[bytes],None]|None=None):
+ 
         if not self.connection is None:
             id=self.genID()
             callbackID=self.broadcast.genID()
@@ -122,13 +121,21 @@ class BytesChannel:
                         callback(self.encode(msg.data) if len(msg.data) else None)
                         self.broadcast.removeCallback(callbackID)
                 self.broadcast.addCallback(_callback,callbackID)
-            self.connection.sendall(id+bytes([0])+self.decode(data)+bytes([0,0,0]))
+            dd=self.decode(data)
+            self.connection.sendall(id+bytes([0])+dd+bytes([0,0,0]))
         else:
             self.awaitMessages.append({"data":data,'callback':callback})
 
     def sendReply(self,data:bytes|None,msgID:int):
         if not self.connection is None:
             
-            self.connection.sendall(self.int_to_bytes(msgID)+bytes([1])+(self.decode(data) if data else bytes([]))+bytes([0,0,0]))
+            self.connection.sendall(self.__int_to_bytes(msgID)+bytes([1])+(self.decode(data) if data else bytes([]))+bytes([0,0,0]))
     
-debugCh=BytesChannel('debug')
+
+class BytesChannel(Channel):
+    
+    def encode(self,data:bytes)->bytes: 
+        return data
+    def decode(self,data)->bytes: 
+        return data
+
