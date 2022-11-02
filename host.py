@@ -1,22 +1,34 @@
+import os
 import socket
+import sys
 from threading import Thread
 import random
-from channels import debugChannel
+from time import sleep
+from channels import StringChannel
 class Host:
     __channels=dict()
+
     def __init__(self) -> None:
         self.__port=random.Random().randint(8000,15000)
         
-        print(self.__port)
-        self.server=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-        # self.server.bind(('127.0.0.1',54112))
-        self.server.bind(('127.0.0.1',self.__port))
+        _LogChannel.oldStd.write(str(self.__port))
+        self.__server=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+   
+        self.__server.bind(('127.0.0.1',self.__port))
         Thread(target= self.__startListen).start()
-        self.bindChannel(debugChannel)
+        if 'dart' in sys.argv:
+            debugChannel=StringChannel('|debug|') 
+            self.bindChannel(debugChannel)
+            self.__controller=_controllChannel(debugChannel,self.__server)
+            sys.stdout=_LogChannel(debugChannel)
     def __startListen(self):
-        self.server.listen()
+        self.__server.listen()
+      
         while True:
-            conn,addr=self.server.accept()
+            try:
+                conn,addr=self.__server.accept()
+            except :
+                break
             while True:
                 
                 buffer=conn.recv(1024)
@@ -26,11 +38,54 @@ class Host:
         
                     channelName=channelName.decode('utf-8')
                     if channelName in self.__channels:
-                        debugChannel.send(f'{channelName} {self.__channels[channelName]}')
+
                         Thread(target=self.__channels[channelName].setConnection,args=(conn,buffer)).start()
                     break
-           
+        print('zz')
 
     def bindChannel(self,channel):
         self.__channels[channel.name]=channel
   
+
+
+
+class _LogChannel:
+    oldStd=None
+    def __init__(self,channel=None) -> None:
+        self.channel=channel
+    
+    def write(self,log):
+        if self.channel:
+            self.channel.send(log)
+    
+    def flush(self):
+        self.oldStd.flush()
+def setStdout():
+    _LogChannel.oldStd=sys.stdout
+    if 'dart' in sys.argv:
+        sys.stdout=_LogChannel()
+class _controllChannel:
+
+    def __init__(self,channel,server:socket.socket) -> None:
+        self.__channel=channel
+        self.__server=server
+        Thread(target=self.__chackeOnConnect).start()
+    def __chackeOnConnect(self): 
+        while True: 
+            if not self.__channel.connected and (self.__channel.connection is not None):
+                self.__server.close()
+                break
+            sleep(1)
+
+
+
+
+
+
+
+
+
+
+setStdout()
+
+

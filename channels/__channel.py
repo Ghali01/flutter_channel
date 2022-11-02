@@ -14,15 +14,16 @@ class Channel:
     def __init__(self,name:str):
         self.name=name        
         self.awaitMessages=[]
-        self.__handeler=None
+        self._handeler=None
         self.connection:socket=None
         self.broadcast:GeneratorBroadcast=None    
-        
+        self.connected=False
     def setConnection(self,connection:socket,buffer):
-        # print(self.name)
+      
         self.connection=connection
+        self.connected=True
         self.broadcast=GeneratorBroadcast(self.__listenToSocket(buffer))
-        self.broadcast.addCallback(self.__listenToMessages,self.broadcast.genID())
+        self.broadcast.addCallback(self._listenToMessages,self.broadcast.genID())
         self.broadcast.startBroadcast()
         while self.awaitMessages:
             msg=self.awaitMessages[0]
@@ -41,6 +42,8 @@ class Channel:
             while True:        
                 data=self.connection.recv(1024)
                 if not data:
+                    self.connected=False
+
                     event.set()
                     break
                 queue.put(data)
@@ -53,7 +56,7 @@ class Channel:
                 index=buffer.index((bytes([0,0,0])))
                 msg=buffer[5:index]
                 msgID=buffer[0:4]
-                msgID=self.__int_from_bytes(msgID)
+                msgID=self._int_from_bytes(msgID)
                 yield Message(data=msg,id=msgID,isReply=buffer[4]==1)
                 buffer=buffer[index+3:]
             sleep(0.1)
@@ -62,17 +65,17 @@ class Channel:
     def genID(self):
         
         r=random.Random().randint(16777216,4294967295)
-        return self.__int_to_bytes(r)
+        return self._int_to_bytes(r)
 
-    def __listenToMessages(self,msg:Message):
+    def _listenToMessages(self,msg:Message):
         if not msg.isReply:
             reply= Reply(self,msg.id)
-            if not self.__handeler is None:
-                self.__handeler(self.encode(msg.data),reply)
+            if not self._handeler is None:
+                self._handeler(self.encodeInput(msg.data),reply)
         
 
 
-    def __int_to_bytes(self,value: int) -> bytes:
+    def _int_to_bytes(self,value: int) -> bytes:
         bin=[]
         while not value==0:
             bin.append(value % 2)
@@ -88,7 +91,7 @@ class Channel:
                 pos+=1
             bytesList.append(int(sum))
         return bytes(bytesList)    
-    def __int_from_bytes(self,bytes: bytes) -> int:
+    def _int_from_bytes(self,bytes: bytes) -> int:
         
         bin=[]
         for b in bytes: 
@@ -106,7 +109,7 @@ class Channel:
         return int(sum) 
 
     def setHandeler(self,handeler:Callable[[bytes,Reply],None]):
-        self.__handeler=handeler
+        self._handeler=handeler
     
 
 
@@ -117,11 +120,12 @@ class Channel:
             callbackID=self.broadcast.genID()
             if callback is not None:
                 def _callback(msg:Message):
-                    if msg.isReply and msg.id==self.__int_from_bytes(id): 
-                        callback(self.encode(msg.data) if len(msg.data) else None)
+                    if msg.isReply and msg.id==self._int_from_bytes(id):
+
+                        callback(self.encodeOutput(msg.data) if len(msg.data) else None)
                         self.broadcast.removeCallback(callbackID)
                 self.broadcast.addCallback(_callback,callbackID)
-            dd=self.decode(data)
+            dd=self.decodeInput(data)
             self.connection.sendall(id+bytes([0])+dd+bytes([0,0,0]))
         else:
             self.awaitMessages.append({"data":data,'callback':callback})
@@ -129,13 +133,24 @@ class Channel:
     def sendReply(self,data:bytes|None,msgID:int):
         if not self.connection is None:
             
-            self.connection.sendall(self.__int_to_bytes(msgID)+bytes([1])+(self.decode(data) if data else bytes([]))+bytes([0,0,0]))
-    
-
+            self.connection.sendall(self._int_to_bytes(msgID)+bytes([1])+(self.decodeOutput(data) if data else bytes([]))+bytes([0,0,0]))
+    def encodeInput(self,data:bytes):    
+        pass
+    def decodeInput(self,data)->bytes: 
+        pass
+    def encodeOutput(self,data:bytes):    
+        pass
+    def decodeOutput(self,data)->bytes: 
+        pass
 class BytesChannel(Channel):
     
-    def encode(self,data:bytes)->bytes: 
+    def encodeOutput(self,data:bytes)->bytes: 
         return data
-    def decode(self,data)->bytes: 
+    def decodeOutput(self,data)->bytes: 
+        return data
+
+    def encodeInput(self,data:bytes)->bytes: 
+        return data
+    def decodeInput(self,data)->bytes: 
         return data
 

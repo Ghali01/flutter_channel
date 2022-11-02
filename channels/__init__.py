@@ -1,5 +1,5 @@
-from .channel import BytesChannel
-from .jsonchannel import JsonChannel
-from .stringchannel import StringChannel
-
-debugChannel=StringChannel('debug')
+from .__jsonchannel import JsonChannel
+from .__channel import BytesChannel
+from .__stringchannel import StringChannel
+from .__channel import Channel
+from .__methodChannel import MethodChannel
