@@ -1,16 +1,16 @@
 # flutter_channel
 
-With this package developer can use python in there flutter applications on windows.
+With this package developers can use python in there flutter applications on windows.
 
 ## how does it work?
 
-This package depends on unix sockets (TCP) protocol
+This package depends on unix sockets (TCP) protocol.
 
 ## how to use?
 
 ### 1. create host
 
-you have to create instance from `Host` class to use it in channels binding as following:
+You have to create instance from `Host` class to use it in channels binding as following:
 
 ```py
     from flutter_channel.host import Host
@@ -19,7 +19,7 @@ you have to create instance from `Host` class to use it in channels binding as f
 
 ### 2. create channels and bind it
 
-there is number of built in channel types to use like:  `BytesChannel`,`JsonChannel`, `StringChannel` and `MethodChannel`.
+There is number of built in channel types to use like:  `BytesChannel`,`JsonChannel`, `StringChannel` and `MethodChannel`.
 
 ```py
 from flutter_channel.channels import BytesChannel,JsonChannel, StringChannel,MethodChannel
@@ -35,10 +35,9 @@ host.bindChannel(channel4)
 
 ### 3. set channel handler  
 
-the handler of the channel is a function that receive the messages that is sent to the channel
-each channel should take tow parameters `message` and `reply`.
+The handler of the channel is a function that receive the messages that is sent to the channel, Each channel should take tow parameters `message` and `reply`.
 
-`message`  is the first parameter and it is the massage that was received and it's type depend on the channel type see the following table.
+`message`  is the first parameter and it is the massage that was received and it's type depends on the channel type see the following table.
 
 | Channel Type | Channel Output |
 |:---:|:---:|
@@ -48,9 +47,10 @@ each channel should take tow parameters `message` and `reply`.
 | `MethodChannel` | depends on reply that comes from dart can be any primitive type like `int` ,`str`,`bool` or `list`   |
 | custom channel | depends on the implement of the `encodeOutput` and `decodeOutput` methods |
 
-`reply` is the second parameter, it is instance of `Reply` you should user this object to send reply on the received message, You can reply with other message or reply with `None`.
+`reply` is the second parameter, it is instance of `Reply` you should use this object to send reply on the received message, You can reply with another message or reply with `None`.
 Your reply will not be sent to the channel handler in the dart side. It will be send to the `send` Future that sent the original message.
-**You have to send reply otherwise dart `Future` will not complete**
+
+ **You have to send reply otherwise dart `Future` will not complete**
 
 #### example 1
 
@@ -82,7 +82,7 @@ channel.setHandler(handler)
 
 ### send message
 
-You can send message to dart side using `send(message)` method where `message` type depends on the channel type  see the following table.
+You can send message to dart side using `send(message,callback)` method where `message` type depends on the channel type  see the following table and `callback` is a function that will be invoked when reply comes back from dart and it take one parameter present the reply message.
 
 | Channel Type | Channel input |
 |:---:|:---:|
@@ -112,13 +112,17 @@ You can send message to dart side using `send(message)` method where `message` t
 
 ### MethodChannel
 
-there is some notes we have to mention to on MethodChannel usage.
+There is some notes we have to mention to about MethodChannel usage.
 
 #### 1. the handler
 
-The handler of the `MethodChannel` receive tow parameter first one is `MethodCall` instance and second one is `Reply` instance.
+The handler of the `MethodChannel` receive two parameter first one is `MethodCall` instance and second one is `Reply` instance.
 
-#### 2. raise exception in the handler
+#### 2. the reply callback
+
+the reply callback function take two parameter, First one is the reply message and the second on is exception with `PythonChannelMethodException` type if exception raised in dart side otherwise the parameter will be `None`.
+
+#### 3. raise exception in the handler
 
 You can raise `PythonChannelMethodException` in the handler this exception will be sent by the channel and will throw it to the `send` Future in dart side.
 

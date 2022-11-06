@@ -1,6 +1,7 @@
 LICENSE
 README.md
 pyproject.toml
+setup.cfg
 flutter_channel/__init__.py
 flutter_channel/host.py
 flutter_channel/message.py
