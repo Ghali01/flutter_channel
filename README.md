@@ -12,22 +12,26 @@ This package depends on unix sockets (TCP) protocol
 
 you have to create instance from `Host` class to use it in channels binding as following:
 
+```py
     from flutter_channel.host import Host
     host=Host()
+```
 
 ### 2. create channels and bind it
 
 there is number of built in channel types to use like:  `BytesChannel`,`JsonChannel`, `StringChannel` and `MethodChannel`.
 
-    from flutter_channel.channels import BytesChannel,JsonChannel, StringChannel,MethodChannel
-    channel1=BytesChannel('channel1')
-    channel2=StringChannel('channel2')
-    channel3=JsonChannel('channel3')
-    channel4=MethodChannel('channel4')
-    host.bindChannel(channel1)
-    host.bindChannel(channel2)
-    host.bindChannel(channel3)
-    host.bindChannel(channel4)
+```py
+from flutter_channel.channels import BytesChannel,JsonChannel, StringChannel,MethodChannel
+channel1=BytesChannel('channel1')
+channel2=StringChannel('channel2')
+channel3=JsonChannel('channel3')
+channel4=MethodChannel('channel4')
+host.bindChannel(channel1)
+host.bindChannel(channel2)
+host.bindChannel(channel3)
+host.bindChannel(channel4)
+```
 
 ### 3. set channel handler  
 
@@ -50,13 +54,16 @@ Your reply will not be sent to the channel handler in the dart side. It will be 
 
 #### example 1
 
-    def handler(msg,reply):
-        # do some logic
-        reply.reply(None)
-    channel.setHandler(handler)
+```py
+def handler(msg,reply):
+    # do some logic
+    reply.reply(None)
+channel.setHandler(handler)
+```
 
 #### example 2
 
+```py
     def handler(msg,reply):
     if msg.method=='add':
         reply.reply(add(msg.args[0],msg.args[1],))
@@ -71,6 +78,7 @@ Your reply will not be sent to the channel handler in the dart side. It will be 
     else:
         raise PythonChannelMethodException(404,'method not found','method not found')
     methodChannel.setHandler(handler)
+```
 
 ### send message
 
@@ -86,6 +94,7 @@ You can send message to dart side using `send(message)` method where `message` t
 
 #### examples
 
+```py
     def callBack(replyMessage):
         pass
 
@@ -99,6 +108,7 @@ You can send message to dart side using `send(message)` method where `message` t
     methodChannel.send(MethodCall(method='sayHello',args={"name":'ghale'}),callBackMethod)
     # or
     methodChannel.invokeMethod(method='sayHello',args={"name":'ghale'},callback=callBackMethod)
+```
 
 ### MethodChannel
 
@@ -114,19 +124,22 @@ You can raise `PythonChannelMethodException` in the handler this exception will 
 
 ##### example
 
+```python
+
 def handler(msg,reply):
     if msg.method=='add':
         reply.reply(add(msg.args[0],msg.args[1],))
-    if msg.method=='sub':
-        reply.reply(sub(msg.args[0],msg.args[1],))
+if msg.method=='sub':
+    reply.reply(sub(msg.args[0],msg.args[1],))
 
-    if msg.method=='mul':
-        reply.reply(mul(msg.args[0],msg.args[1],))
+if msg.method=='mul':
+    reply.reply(mul(msg.args[0],msg.args[1],))
 
-    if msg.method=='div':
-        reply.reply(div(msg.args[0],msg.args[1],))
-    else:
-        raise PythonChannelMethodException(404,'method not found','method not found')
+if msg.method=='div':
+    reply.reply(div(msg.args[0],msg.args[1],))
+else:
+    raise PythonChannelMethodException(404,'method not found','method not found')
+```
 
 ## print() function
 
@@ -146,6 +159,7 @@ where the **input** is what the channel send and the **output** is what the chan
 
 ### for example
 
+```py
     from flutter_channel.channels import Channel,
     class StringChannel(Channel):
     
@@ -157,6 +171,7 @@ where the **input** is what the channel send and the **output** is what the chan
         return data.decode('utf-8')
     def decodeOutput(self,data:str)->bytes: 
         return data.encode('utf-8')
+```
 
 ## release mode
 
