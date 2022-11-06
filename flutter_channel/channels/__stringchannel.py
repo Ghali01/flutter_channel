@@ -1,5 +1,4 @@
-from channels.__channel import Channel
-from typing import Callable
+from .__channel import Channel
 class StringChannel(Channel):
 
     

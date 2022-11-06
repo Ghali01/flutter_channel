@@ -1,4 +1,4 @@
-from exceptions import ArgsMethodCallException
+from .exceptions import ArgsMethodCallException
 import json
 class MethodCall:
 

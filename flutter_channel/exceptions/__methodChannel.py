@@ -8,7 +8,7 @@ class ArgsMethodCallException(Exception):
         return 'MehtodCall args should be list or dict'
 
 @dataclass
-class PythonChannelMethodExcetption(Exception):
+class PythonChannelMethodException(Exception):
     code:int 
     message:str
     details:str
@@ -24,8 +24,8 @@ class PythonChannelMethodExcetption(Exception):
 
     @staticmethod
     def fromDict(data:dict):
-        return PythonChannelMethodExcetption(**data)
+        return PythonChannelMethodException(**data)
 
     @staticmethod
     def fromJson(data:str):
-        return PythonChannelMethodExcetption.fromDict(json.loads(data))
+        return PythonChannelMethodException.fromDict(json.loads(data))

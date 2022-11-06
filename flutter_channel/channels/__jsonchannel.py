@@ -1,4 +1,4 @@
-from channels.__channel import Channel
+from .__channel import Channel
 from typing import Callable
 import json
 class JsonChannel(Channel):

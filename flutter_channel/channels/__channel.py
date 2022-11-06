@@ -2,10 +2,10 @@ from multiprocessing import Queue
 from threading import Thread,Event
 from time import sleep
 from socket import socket
-from .reply import Reply
-from typing import Callable
-from utils.boradcast import GeneratorBroadcast
-from message import Message
+from ..reply import Reply
+from typing import Any, Callable
+from ..utils.boradcast import GeneratorBroadcast
+from ..message import Message
 import random
 import json
 class Channel:
@@ -14,7 +14,7 @@ class Channel:
     def __init__(self,name:str):
         self.name=name        
         self.awaitMessages=[]
-        self._handeler=None
+        self._handler=None
         self.connection:socket=None
         self.broadcast:GeneratorBroadcast=None    
         self.connected=False
@@ -70,8 +70,8 @@ class Channel:
     def _listenToMessages(self,msg:Message):
         if not msg.isReply:
             reply= Reply(self,msg.id)
-            if not self._handeler is None:
-                self._handeler(self.encodeInput(msg.data),reply)
+            if not self._handler is None:
+                self._handler(self.encodeInput(msg.data),reply)
         
 
 
@@ -108,12 +108,12 @@ class Channel:
             pos+=1
         return int(sum) 
 
-    def setHandeler(self,handeler:Callable[[bytes,Reply],None]):
-        self._handeler=handeler
+    def setHandler(self,handler:Callable[[bytes,Reply],None]):
+        self._handler=handler
     
 
 
-    def send(self,data:bytes,callback:Callable[[bytes],None]|None=None):
+    def send(self,data:Any,callback:Callable[[Any],None]|None=None):
  
         if not self.connection is None:
             id=self.genID()

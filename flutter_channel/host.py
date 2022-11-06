@@ -4,7 +4,7 @@ import sys
 from threading import Thread
 import random
 from time import sleep
-from channels import StringChannel
+from .channels import StringChannel
 class Host:
     __channels=dict()
 
@@ -17,10 +17,10 @@ class Host:
         self.__server.bind(('127.0.0.1',self.__port))
         Thread(target= self.__startListen).start()
         if 'dart' in sys.argv:
-            debugChannel=StringChannel('|debug|') 
-            self.bindChannel(debugChannel)
-            self.__controller=_controllChannel(debugChannel,self.__server)
-            sys.stdout=_LogChannel(debugChannel)
+            self.debugChannel=StringChannel('|debug|') 
+            self.bindChannel(self.debugChannel)
+            self.__controller=_controllChannel(self.debugChannel,self.__server)
+            sys.stdout=_LogChannel(self.debugChannel)
     def __startListen(self):
         self.__server.listen()
       
@@ -41,8 +41,8 @@ class Host:
 
                         Thread(target=self.__channels[channelName].setConnection,args=(conn,buffer)).start()
                     break
-        print('zz')
-
+     
+     
     def bindChannel(self,channel):
         self.__channels[channel.name]=channel
   
@@ -69,9 +69,11 @@ class _controllChannel:
     def __init__(self,channel,server:socket.socket) -> None:
         self.__channel=channel
         self.__server=server
-        Thread(target=self.__chackeOnConnect).start()
+        self.th=Thread(target=self.__chackeOnConnect)
+        self.th.start()
     def __chackeOnConnect(self): 
         while True: 
+
             if not self.__channel.connected and (self.__channel.connection is not None):
                 self.__server.close()
                 break

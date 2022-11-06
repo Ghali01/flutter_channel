@@ -1,10 +1,10 @@
 import json
-from typing import Callable
-from channels import Channel
-from methodCall import MethodCall
-from exceptions import PythonChannelMethodExcetption
-from message import Message
-from .reply import Reply
+from typing import Any, Callable
+from .__channel import Channel
+from ..methodCall import MethodCall
+from ..exceptions import PythonChannelMethodException
+from ..message import Message
+from ..reply import Reply
 class MethodChannel(Channel):
 
     def encodeInput(self,data:bytes):    
@@ -24,8 +24,8 @@ class MethodChannel(Channel):
 
     def encodeException(self, data: bytes):
         js=data[1:].decode('utf-8')
-        return PythonChannelMethodExcetption.fromJson(js)
-    def decodeException(self, data: PythonChannelMethodExcetption):
+        return PythonChannelMethodException.fromJson(js)
+    def decodeException(self, data: PythonChannelMethodException):
         js=data.toJson()
         return bytes([1])+js.encode('utf-8')
     
@@ -33,10 +33,10 @@ class MethodChannel(Channel):
     def _listenToMessages(self,msg:Message):
         if not msg.isReply:
             reply= Reply(self,msg.id)
-            if not self._handeler is None:
+            if not self._handler is None:
                 try:
-                    self._handeler(self.encodeInput(msg.data),reply)
-                except PythonChannelMethodExcetption as e:
+                    self._handler(self.encodeInput(msg.data),reply)
+                except PythonChannelMethodException as e:
                     self.__sendException(e,msg.id)
     def __sendException(self,data,msgID:int):
         if not self.connection is None:
@@ -48,7 +48,7 @@ class MethodChannel(Channel):
         self.send(call,callback)
         
 
-    def send(self,data:MethodCall,callback:Callable[[bytes],None]|None=None):
+    def send(self,data:MethodCall,callback:Callable[[Any,PythonChannelMethodException],None]|None=None):
  
         if not self.connection is None:
             id=self.genID()

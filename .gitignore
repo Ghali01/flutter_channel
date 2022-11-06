@@ -1,3 +1,7 @@
 test*
 
 *.pyc
+*.spec
+
+build/
+dist/
