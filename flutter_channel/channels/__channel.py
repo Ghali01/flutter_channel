@@ -43,8 +43,8 @@ class Channel:
                 data=self.connection.recv(1024)
                 if not data:
                     self.connected=False
-
                     event.set()
+                    
                     break
                 queue.put(data)
         Thread(target=listen,args=(q,)).start()

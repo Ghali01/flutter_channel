@@ -35,7 +35,7 @@ host.bindChannel(channel4)
 
 ### 3. set channel handler  
 
-The handler of the channel is a function that receive the messages that is sent to the channel, Each channel should take tow parameters `message` and `reply`.
+The handler of the channel is a function that receive the messages that is sent to the channel, Each handler should take tow parameters `message` and `reply`.
 
 `message`  is the first parameter and it is the massage that was received and it's type depends on the channel type see the following table.
 
@@ -155,10 +155,10 @@ This package change the behavior of the `print()` the stdout of the python will 
 You can create your own channel by write class that inherit `Channel` class.
 You should implement 4 method `encodeInput`, `encodeOutput` ,`decodeInput` and `decodeOutput`
 
-`encodeInput` convert the input of the channel from `bytes`
-`encodeOutput` convert the output of the channel from `bytes`
-`decodeInput` convert the input of the channel to `bytes`
-`decodeOutput` convert the input of the channel to `bytes`
++ `encodeInput` convert the input of the channel from `bytes`
++ `encodeOutput` convert the output of the channel from `bytes`
++ `decodeInput` convert the input of the channel to `bytes`
++ `decodeOutput` convert the input of the channel to `bytes`
 where the **input** is what the channel send and the **output** is what the channel receive
 
 ### for example
@@ -180,3 +180,4 @@ where the **input** is what the channel send and the **output** is what the chan
 ## release mode
 
 in release mode you have to compile you main python file to an executable file, We recommend you to use [PyInstaller](https://pypi.org/project/pyinstaller/).
+**Note: you have to build the executable file with console otherwise the package will not work**
