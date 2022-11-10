@@ -18,6 +18,7 @@ class Channel:
         self.connection:socket=None
         self.broadcast:GeneratorBroadcast=None    
         self.connected=False
+        self._onDisconnect=None
     def setConnection(self,connection:socket,buffer):
       
         self.connection=connection
@@ -44,7 +45,8 @@ class Channel:
                 if not data:
                     self.connected=False
                     event.set()
-                    
+                    if self._onDisconnect:
+                        self._onDisconnect()
                     break
                 queue.put(data)
         Thread(target=listen,args=(q,)).start()
@@ -142,6 +144,15 @@ class Channel:
         pass
     def decodeOutput(self,data)->bytes: 
         pass
+    def setOnDisconnect(self,callback:Callable):
+        self._onDisconnect=callback
+
+
+
+
+
+
+
 class BytesChannel(Channel):
     
     def encodeOutput(self,data:bytes)->bytes: 

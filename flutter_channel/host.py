@@ -4,6 +4,7 @@ import sys
 from threading import Thread
 import random
 from time import sleep
+from typing import Callable
 from .channels import StringChannel
 
 
@@ -46,7 +47,8 @@ class Host:
 
                         Thread(target=self.__channels[channelName].setConnection,args=(conn,buffer)).start()
                     break
-     
+    def setOnDisconnect(self,callback:Callable):
+        self.debugChannel.setOnDisconnect(callback)
        
     def bindChannel(self,channel):
         self.__channels[channel.name]=channel

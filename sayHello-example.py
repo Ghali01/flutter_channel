@@ -11,6 +11,7 @@ def handler(msg,reply):
 
 def main():
     host=Host()
+
     channel=MethodChannel('sayHi')
     channel.setHandler(handler)
     host.bindChannel(channel)
